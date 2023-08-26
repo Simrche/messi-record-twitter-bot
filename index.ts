@@ -21,12 +21,15 @@ async function run() {
 
     const page = await browser.newPage();
 
+    console.log("Collecting Best Players ...");
     const players: Player[] = await collectBestPlayers(page);
 
     await wait(1000);
 
+    console.log("Filtering players ...");
     const filteredPlayers = await filterPlayers(page, players);
 
+    console.log("Building tweet ...");
     const tweet = buildTweet(filteredPlayers);
 
     await sendTweet(tweet);
@@ -43,7 +46,9 @@ async function collectBestPlayers(page: Page) {
 
     const collectedPlayers: Player[] = [];
 
+    console.log("Collect PlayerRows ...");
     const playerRows = await page.$$(".pbestscorers:nth-child(2) .line");
+    console.log("playerRows", playerRows);
 
     if (!playerRows.length) throw new Error("Best players not found");
 
