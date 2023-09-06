@@ -1,28 +1,20 @@
 import dotenv from "dotenv";
 import cron from "node-cron";
-import puppeteer, { Page } from "puppeteer";
+import puppeteer from "puppeteer";
 import { TwitterApi } from "twitter-api-v2";
-import { wait } from "./utils";
 
 dotenv.config();
-
-type Player = {
-    fullName: string;
-    lastName: string;
-    country: string;
-    goalCount: number;
-};
 
 async function run() {
     const browser = await puppeteer.launch({
         slowMo: 50,
-        headless: "new",
+        headless: false,
     });
 
     const page = await browser.newPage();
 
     console.log("Collecting Best Players ...");
-    const players: Player[] = await collectBestPlayers(page);
+    const players = await collectBestPlayers(page);
 
     await wait(1000);
 
@@ -37,7 +29,7 @@ async function run() {
     await browser.close();
 }
 
-async function collectBestPlayers(page: Page) {
+async function collectBestPlayers(page) {
     try {
         await page.goto("https://www.footballdatabase.eu/fr/joueurs", {
             waitUntil: "load",
@@ -51,7 +43,7 @@ async function collectBestPlayers(page: Page) {
 
     await wait(2000);
 
-    const collectedPlayers: Player[] = [];
+    const collectedPlayers = [];
 
     console.log("Collect PlayerRows ...");
     const playerRows = await page.$$(".pbestscorers:nth-child(2) .line");
@@ -59,7 +51,7 @@ async function collectBestPlayers(page: Page) {
 
     if (!playerRows.length) throw new Error("Best players not found");
 
-    for (let index = 2; index < playerRows.length; index++) {
+    for (let index = 2; index < playerRows.length + 2; index++) {
         // Get the player's country
         const playerCountryName = await page.evaluate(
             (data) => {
@@ -79,9 +71,9 @@ async function collectBestPlayers(page: Page) {
         const playerNameButton = await page.$(
             `.pbestscorers:nth-child(2) .line:nth-child(${index}) > .player > a`
         );
-        const playerFullName = (await playerNameButton?.getProperty(
+        const playerFullName = (await playerNameButton.getProperty(
             "textContent"
-        ))!
+        ))
             .toString()
             .replace("JSHandle:", "")
             .trim();
@@ -90,17 +82,17 @@ async function collectBestPlayers(page: Page) {
         const playerGoalCountButton = await page.$(
             `.module:nth-child(2) .line:nth-child(${index}) > .score > a`
         );
-        const playerGoalCount = (await playerGoalCountButton?.getProperty(
+        const playerGoalCount = (await playerGoalCountButton.getProperty(
             "textContent"
-        ))!
+        ))
             .toString()
             .replace("JSHandle:", "")
             .trim();
 
         const player = {
             fullName: playerFullName,
-            lastName: playerFullName.split(" ").pop()!,
-            country: playerCountryName!,
+            lastName: playerFullName.split(" ").pop(),
+            country: playerCountryName,
             goalCount: +playerGoalCount,
         };
 
@@ -110,7 +102,7 @@ async function collectBestPlayers(page: Page) {
     return collectedPlayers;
 }
 
-async function filterPlayers(page: Page, players: Player[]) {
+async function filterPlayers(page, players) {
     await page.goto(
         "https://www.maxifoot.fr/classement-buteur-europe-annee-civile-2023.htm",
         { waitUntil: "load" }
@@ -118,7 +110,7 @@ async function filterPlayers(page: Page, players: Player[]) {
 
     await wait(2000);
 
-    const validPlayersLastNames: string[] = [];
+    const validPlayersLastNames = [];
 
     const playerRows = await page.$$("tr .jou1 > b");
 
@@ -140,13 +132,13 @@ async function filterPlayers(page: Page, players: Player[]) {
     );
 }
 
-function buildTweet(filteredPlayers: Player[]) {
-    const tweetLignes: string[] = ["❌ No.\n\nClosest players in 2023 :\n\n"];
+function buildTweet(filteredPlayers) {
+    const tweetLignes = ["❌ No.\n\nClosest players in 2023 :\n\n"];
 
     for (let index = 0; index < filteredPlayers.length; index++) {
         if (index > 4) break;
 
-        const player: Player = filteredPlayers[index];
+        const player = filteredPlayers[index];
 
         tweetLignes.push(`${player.fullName} - ${player.goalCount} ⚽️\n`);
     }
@@ -154,17 +146,17 @@ function buildTweet(filteredPlayers: Player[]) {
     return tweetLignes.join().replace(/[","]/g, "");
 }
 
-async function sendTweet(tweet: string) {
+async function sendTweet(tweet) {
     console.log(tweet);
 
     if (process.env.NODE_ENV === "development") return;
 
     try {
         const client = new TwitterApi({
-            appKey: process.env.API_KEY as string,
-            appSecret: process.env.API_SECRET as string,
-            accessToken: process.env.ACCESS_TOKEN as string,
-            accessSecret: process.env.ACCESS_SECRET as string,
+            appKey: process.env.API_KEY,
+            appSecret: process.env.API_SECRET,
+            accessToken: process.env.ACCESS_TOKEN,
+            accessSecret: process.env.ACCESS_SECRET,
         });
 
         const twitterClient = client.readWrite;
@@ -182,3 +174,10 @@ cron.schedule("5 0 * * *", async () => {
         console.log(error);
     }
 });
+
+run()
+
+
+async function wait(duration) {
+    return new Promise((resolve) => setTimeout(resolve, duration));
+}
