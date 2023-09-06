@@ -8,7 +8,7 @@ dotenv.config();
 async function run() {
     const browser = await puppeteer.launch({
         slowMo: 50,
-        headless: false,
+        headless: "new",
         args: ['--no-sandbox']
     });
 
