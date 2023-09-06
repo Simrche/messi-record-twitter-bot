@@ -176,9 +176,6 @@ cron.schedule("5 0 * * *", async () => {
     }
 });
 
-run()
-
-
 async function wait(duration) {
     return new Promise((resolve) => setTimeout(resolve, duration));
 }
