@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import fs from "fs";
 import cron from "node-cron";
 import puppeteer from "puppeteer";
 import { TwitterApi } from "twitter-api-v2";
@@ -48,7 +49,6 @@ async function collectBestPlayers(page) {
 
     console.log("Collect PlayerRows ...");
     const playerRows = await page.$$(".pbestscorers:nth-child(2) .line");
-    console.log("playerRows", playerRows);
 
     if (!playerRows.length) throw new Error("Best players not found");
 
@@ -172,10 +172,23 @@ cron.schedule("5 0 * * *", async () => {
     try {
         await run();
     } catch (error) {
-        console.log(error);
+        createErrorLogFile(error)
     }
 });
 
 async function wait(duration) {
     return new Promise((resolve) => setTimeout(resolve, duration));
+}
+
+function createErrorLogFile(text) {
+    const date = new Date()
+    
+    fs.appendFile(
+        `logs/${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-error-logs-${date.getTime()}.txt`, 
+        text.toString(), 
+        function (err) {
+            if (err) throw err;
+            console.log('An error happened ! You can access error logs in the log folder !');
+        }
+    )
 }
