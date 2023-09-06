@@ -9,6 +9,7 @@ async function run() {
     const browser = await puppeteer.launch({
         slowMo: 50,
         headless: false,
+        args: ['--no-sandbox']
     });
 
     const page = await browser.newPage();
