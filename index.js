@@ -32,16 +32,9 @@ async function run() {
 }
 
 async function collectBestPlayers(page) {
-    try {
-        await page.goto("https://www.footballdatabase.eu/fr/joueurs", {
-            waitUntil: "load",
-        });
-    } catch (e) {
-        await page.screenshot({
-            path: "screenshots/error.jpg",
-            fullPage: true,
-        });
-    }
+    await page.goto("https://www.footballdatabase.eu/fr/joueurs", {
+        waitUntil: "load",
+    });
 
     await wait(2000);
 
