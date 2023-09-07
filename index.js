@@ -161,7 +161,7 @@ async function sendTweet(tweet) {
     }
 }
 
-cron.schedule("5 0 * * *", async () => {
+cron.schedule("5 22 * * *", async () => {
     try {
         await run();
     } catch (error) {
