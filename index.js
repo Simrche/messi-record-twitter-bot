@@ -32,7 +32,7 @@ async function run() {
 }
 
 async function collectBestPlayers(page) {
-    await page.goto("https://www.footballdatabase.eu/fr/joueurs", {
+    await page.goto("https://www.footballdatabase.eu/en/players", {
         waitUntil: "load",
     });
 
@@ -44,6 +44,8 @@ async function collectBestPlayers(page) {
     const playerRows = await page.$$(".pbestscorers:nth-child(2) .line");
 
     if (!playerRows.length) throw new Error("Best players not found");
+
+    console.log(playerRows.length + " players found")
 
     for (let index = 2; index < playerRows.length + 2; index++) {
         // Get the player's country
@@ -89,6 +91,8 @@ async function collectBestPlayers(page) {
             country: playerCountryName,
             goalCount: +playerGoalCount,
         };
+
+        console.log(player)
 
         collectedPlayers.push(player);
     }
