@@ -10,7 +10,7 @@ async function run() {
     const browser = await puppeteer.launch({
         slowMo: 50,
         headless: "new",
-        args: ['--no-sandbox']
+        args: ["--no-sandbox"],
     });
 
     const page = await browser.newPage();
@@ -36,7 +36,7 @@ async function collectBestPlayers(page) {
         waitUntil: "load",
     });
 
-    await wait(2000);
+    await wait(5000);
 
     const collectedPlayers = [];
 
@@ -45,7 +45,7 @@ async function collectBestPlayers(page) {
 
     if (!playerRows.length) throw new Error("Best players not found");
 
-    console.log(playerRows.length + " players found")
+    console.log(playerRows.length + " players found");
 
     for (let index = 2; index < playerRows.length + 2; index++) {
         // Get the player's country
@@ -67,9 +67,9 @@ async function collectBestPlayers(page) {
         const playerNameButton = await page.$(
             `.pbestscorers:nth-child(2) .line:nth-child(${index}) > .player > a`
         );
-        const playerFullName = (await playerNameButton.getProperty(
-            "textContent"
-        ))
+        const playerFullName = (
+            await playerNameButton.getProperty("textContent")
+        )
             .toString()
             .replace("JSHandle:", "")
             .trim();
@@ -78,9 +78,9 @@ async function collectBestPlayers(page) {
         const playerGoalCountButton = await page.$(
             `.module:nth-child(2) .line:nth-child(${index}) > .score > a`
         );
-        const playerGoalCount = (await playerGoalCountButton.getProperty(
-            "textContent"
-        ))
+        const playerGoalCount = (
+            await playerGoalCountButton.getProperty("textContent")
+        )
             .toString()
             .replace("JSHandle:", "")
             .trim();
@@ -92,7 +92,7 @@ async function collectBestPlayers(page) {
             goalCount: +playerGoalCount,
         };
 
-        console.log(player)
+        console.log(player);
 
         collectedPlayers.push(player);
     }
@@ -165,11 +165,11 @@ async function sendTweet(tweet) {
     }
 }
 
-cron.schedule("5 22 * * *", async () => {
+cron.schedule("5 23 * * *", async () => {
     try {
         await run();
     } catch (error) {
-        createErrorLogFile(error)
+        createErrorLogFile(error);
     }
 });
 
@@ -178,14 +178,16 @@ async function wait(duration) {
 }
 
 function createErrorLogFile(text) {
-    const date = new Date()
-    
+    const date = new Date();
+
     fs.appendFile(
-        `logs/${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-error-logs-${date.getTime()}.txt`, 
-        text.toString(), 
+        `logs/${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-error-logs-${date.getTime()}.txt`,
+        text.toString(),
         function (err) {
             if (err) throw err;
-            console.log('An error happened ! You can access error logs in the log folder !');
+            console.log(
+                "An error happened ! You can access error logs in the log folder !"
+            );
         }
-    )
+    );
 }
