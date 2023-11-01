@@ -15,6 +15,8 @@ async function run() {
 
     const page = await browser.newPage();
 
+    await page.setDefaultNavigationTimeout(60000);
+
     console.log("Collecting Best Players ...");
     const players = await collectBestPlayers(page);
 
