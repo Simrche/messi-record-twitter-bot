@@ -25,10 +25,12 @@ async function run() {
     console.log("Filtering players ...");
     const filteredPlayers = await filterPlayers(page, players);
 
+    const bestPlayer = filteredPlayers[0];
+
     console.log("Building tweet ...");
     const tweet = buildTweet(filteredPlayers);
 
-    await sendTweet(tweet);
+    await sendTweet(tweet, bestPlayer);
 
     await browser.close();
 }
@@ -146,7 +148,7 @@ function buildTweet(filteredPlayers) {
     return tweetLignes.join().replace(/[","]/g, "");
 }
 
-async function sendTweet(tweet) {
+async function sendTweet(tweet, bestPlayer) {
     console.log(tweet);
 
     if (process.env.NODE_ENV === "development") return;
@@ -161,7 +163,16 @@ async function sendTweet(tweet) {
 
         const twitterClient = client.readWrite;
 
-        await twitterClient.v2.tweet(tweet);
+        const mediaId = await twitterClient.v1.uploadMedia(
+            `img/${bestPlayer.lastName}.jpeg`
+        );
+
+        await twitterClient.v2.tweet({
+            text: tweet,
+            media: {
+                media_ids: [mediaId],
+            },
+        });
     } catch (e) {
         console.log("Failed to send tweet.", e);
     }
