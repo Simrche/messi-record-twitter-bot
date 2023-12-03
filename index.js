@@ -25,12 +25,12 @@ async function run() {
     console.log("Filtering players ...");
     const filteredPlayers = await filterPlayers(page, players);
 
-    const bestPlayer = filteredPlayers[0];
+    const bestPlayers = getBestPlayers(filteredPlayers);
 
     console.log("Building tweet ...");
     const tweet = buildTweet(filteredPlayers);
 
-    await sendTweet(tweet, bestPlayer);
+    await sendTweet(tweet, bestPlayers);
 
     await browser.close();
 }
@@ -134,6 +134,12 @@ async function filterPlayers(page, players) {
     );
 }
 
+function getBestPlayers(players) {
+    const bestPlayerGoalCount = players[0].goalCount;
+
+    return players.filter((player) => player.goalCount === bestPlayerGoalCount);
+}
+
 function buildTweet(filteredPlayers) {
     const tweetLignes = ["❌ No.\n\nClosest players in 2023 :\n\n"];
 
@@ -148,7 +154,7 @@ function buildTweet(filteredPlayers) {
     return tweetLignes.join().replace(/[","]/g, "");
 }
 
-async function sendTweet(tweet, bestPlayer) {
+async function sendTweet(tweet, bestPlayers) {
     console.log(tweet);
 
     if (process.env.NODE_ENV === "development") return;
@@ -163,14 +169,20 @@ async function sendTweet(tweet, bestPlayer) {
 
         const twitterClient = client.readWrite;
 
-        const mediaId = await twitterClient.v1.uploadMedia(
-            `img/${bestPlayer.lastName}.jpeg`
-        );
+        const mediaIds = [];
+
+        for (const player of bestPlayers) {
+            const mediaId = await twitterClient.v1.uploadMedia(
+                `img/${player.lastName}.jpeg`
+            );
+
+            mediaIds.push(mediaId);
+        }
 
         await twitterClient.v2.tweet({
             text: tweet,
             media: {
-                media_ids: [mediaId],
+                media_ids: mediaIds,
             },
         });
     } catch (e) {
