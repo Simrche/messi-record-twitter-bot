@@ -25,6 +25,11 @@ async function run() {
     console.log("Filtering players ...");
     const filteredPlayers = await filterPlayers(page, players);
 
+    if (!filteredPlayers.length) {
+        console.log("No players");
+        return;
+    }
+
     const bestPlayers = getBestPlayers(filteredPlayers);
 
     console.log("Building tweet ...");
@@ -106,7 +111,7 @@ async function collectBestPlayers(page) {
 
 async function filterPlayers(page, players) {
     await page.goto(
-        "https://www.maxifoot.fr/classement-buteur-europe-annee-civile-2023.htm",
+        "https://www.maxifoot.fr/classement-buteur-europe-annee-civile-2024.htm",
         { waitUntil: "load" }
     );
 
@@ -141,7 +146,7 @@ function getBestPlayers(players) {
 }
 
 function buildTweet(filteredPlayers) {
-    const tweetLignes = ["❌ No.\n\nClosest players in 2023 :\n\n"];
+    const tweetLignes = ["❌ No.\n\nClosest players in 2024 :\n\n"];
 
     for (let index = 0; index < filteredPlayers.length; index++) {
         if (index > 4) break;
