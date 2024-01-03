@@ -199,8 +199,6 @@ async function sendTweet(tweet, bestPlayers) {
     }
 }
 
-run();
-
 cron.schedule("5 23 * * *", async () => {
     try {
         await run();
