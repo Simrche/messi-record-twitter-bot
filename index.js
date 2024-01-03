@@ -177,11 +177,15 @@ async function sendTweet(tweet, bestPlayers) {
         const mediaIds = [];
 
         for (const player of bestPlayers) {
-            const mediaId = await twitterClient.v1.uploadMedia(
-                `img/${player.lastName}.jpeg`
-            );
+            try {
+                const mediaId = await twitterClient.v1.uploadMedia(
+                    `img/${player.lastName}.jpeg`
+                );
 
-            mediaIds.push(mediaId);
+                mediaIds.push(mediaId);
+            } catch (error) {
+                console.log("Player without picture:", player.lastName);
+            }
         }
 
         await twitterClient.v2.tweet({
@@ -194,6 +198,8 @@ async function sendTweet(tweet, bestPlayers) {
         console.log("Failed to send tweet.", e);
     }
 }
+
+run();
 
 cron.schedule("5 23 * * *", async () => {
     try {
