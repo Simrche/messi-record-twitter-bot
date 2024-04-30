@@ -199,7 +199,7 @@ async function sendTweet(tweet, bestPlayers) {
     }
 }
 
-cron.schedule("5 23 * * *", async () => {
+cron.schedule("5 21 * * *", async () => {
     try {
         await run();
     } catch (error) {
