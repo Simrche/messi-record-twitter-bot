@@ -111,7 +111,7 @@ async function collectBestPlayers(page) {
 
 async function filterPlayers(page, players) {
     await page.goto(
-        "https://www.maxifoot.fr/classement-buteur-europe-annee-civile-2024.htm",
+        "https://www.maxifoot.fr/classement-buteur-europe-annee-civile-2-2024.htm",
         { waitUntil: "load" }
     );
 
@@ -199,7 +199,7 @@ async function sendTweet(tweet, bestPlayers) {
     }
 }
 
-cron.schedule("5 21 * * *", async () => {
+cron.schedule("5 22 * * *", async () => {
     try {
         await run();
     } catch (error) {
